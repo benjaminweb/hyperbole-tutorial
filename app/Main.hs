@@ -46,19 +46,19 @@ centralView s = do
     button (ChangeSelectedTo B) id "B"
     button (ChangeSelectedTo C) id "C"
     col (border 3 . pad 10) $ do
-      hyper Presets presetsView
+      hyper Presets $ presetsView s
 
 data Presets = Presets
   deriving (Show, Read, ViewId)
 
-data PresetsAction = View deriving (Show, Read, ViewAction)
+data PresetsAction = View Selected deriving (Show, Read, ViewAction)
 
 instance HyperView Presets where
   type Action Presets = PresetsAction
 
 presets :: (Hyperbole :> es) => Presets -> PresetsAction -> Eff es (View Presets ())
-presets _ View = pure $ presetsView
+presets _ (View s) = pure $ presetsView s
 
-presetsView :: View Presets ()
-presetsView = do
-  text "foo"
+presetsView :: Selected -> View Presets ()
+presetsView s = do
+  text $ "viewing details for " `T.append` T.pack (show s)
