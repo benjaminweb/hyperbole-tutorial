@@ -47,7 +47,7 @@ centralView s = do
     button (ChangeSelectedTo C) id "C"
     col (border 3 . pad 10 . gap 10) $ do
       hyper Presets $ presetsView s
-      hyper Results $ resultsView Result1
+      hyper Results $ resultsView Nothing
 
 data Presets = Presets
   deriving (Show, Read, ViewId)
@@ -62,16 +62,25 @@ presets _ (View s) = pure $ presetsView s
 
 presetsView :: Selected -> View Presets ()
 presetsView s = do
-  text $ "viewing details for " `T.append` T.pack (show s)
-  target Results $ button (ViewResults Result1) id "Result1"
-  target Results $ button (ViewResults Result2) id "Result2"
+  col (border 3 . pad 10) $ do
+    text $ "viewing details for " `T.append` T.pack (show s)
+    let variant x t = target Results $ button (ViewResults $ Just x) id t
+    case s of
+      A -> col id $ variant Result1 "Result1"
+      B -> col id $ do
+                      variant Result2 "Result2"                    
+                      variant Result3 "Result3"
+      C -> col id $ do
+                      variant Result4 "Result4"
+                      variant Result5 "Result5"
+                      variant Result6 "Result6"
 
 data Results = Results
   deriving (Show, Read, ViewId)
 
-data ResultVariant = Result1 | Result2 | Result3 deriving (Show, Eq, Read)
+data ResultVariant = Result1 | Result2 | Result3 | Result4 | Result5 | Result6 deriving (Show, Eq, Read)
 
-data ResultsAction = ViewResults ResultVariant deriving (Show, Read, ViewAction)
+data ResultsAction = ViewResults (Maybe ResultVariant) deriving (Show, Read, ViewAction)
 
 instance HyperView Results where
   type Action Results = ResultsAction
@@ -79,7 +88,13 @@ instance HyperView Results where
 results :: (Hyperbole :> es) => Results -> ResultsAction -> Eff es (View Results ())
 results _ (ViewResults x) = pure $ col (border 3 . pad 10) $ resultsView x
 
-resultsView :: ResultVariant -> View Results ()
-resultsView Result1 = text "one short result"
-resultsView Result2 = text "a different result"
-resultsView Result3 = text "this is a special result"
+resultsView :: Maybe ResultVariant -> View Results ()
+resultsView Nothing = col (border 3 . pad 10) $ el_ $ text "no results!"
+resultsView (Just x) = col (border 3 . pad 10) $ text $
+                         case x of
+                           Result1 -> "one short result"
+                           Result2 -> "a different result"
+                           Result3 -> "this is a special result"
+                           Result4 -> "THIS IS NUUMBER FOOOUR!"
+                           Result5 -> "give me a high five"
+                           Result6 -> "and no. 6"
