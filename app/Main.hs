@@ -3,6 +3,7 @@ module Main where
 import qualified Data.Text as T
 import Data.Text (Text)
 import Web.Hyperbole
+import Data.Maybe (fromMaybe)
 
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -25,18 +26,20 @@ data Selected = A | B | C deriving (Show, Eq, Read)
 
 instance HyperView Central where
   type Action Central = CentralAction
-  type Require Central = '[Presets, Results]
+  type Require Central = '[Presets, Results, Sidebar]
   
 central :: Central -> CentralAction -> Eff es (View Central ())
 central _ (ChangeSelectedTo x) = pure $ centralView x
 
-centralPage :: (Hyperbole :> es) => Page es '[Central, Presets, Results]
+centralPage :: (Hyperbole :> es) => Page es '[Central, Presets, Results, Sidebar]
 centralPage = do
   -- message listens for any actions that the centralView triggers
-  handle central $ handle presets $ handle results $ load $ do
+  handle central $ handle presets $ handle results $ handle sidebar $ load $ do
     pure $ do
       el bold "Message Page"
-      hyper Central $ centralView A
+      row (border 3 . pad 10 . gap 10) $ do
+        hyper Sidebar $ sidebarView Nothing
+        hyper Central $ centralView A
 
 centralView :: Selected -> View Central ()
 centralView s = do
@@ -90,11 +93,27 @@ results _ (ViewResults x) = pure $ col (border 3 . pad 10) $ resultsView x
 
 resultsView :: Maybe ResultVariant -> View Results ()
 resultsView Nothing = col (border 3 . pad 10) $ el_ $ text "no results!"
-resultsView (Just x) = col (border 3 . pad 10) $ text $
+resultsView (Just x) = col (border 3 . pad 10) $ 
                          case x of
-                           Result1 -> "one short result"
-                           Result2 -> "a different result"
-                           Result3 -> "this is a special result"
-                           Result4 -> "THIS IS NUUMBER FOOOUR!"
-                           Result5 -> "give me a high five"
-                           Result6 -> "and no. 6"
+                           Result1 -> text "one short result"
+                           Result2 -> text "a different result"
+                           Result3 -> text "this is a special result"
+                           Result4 -> text "THIS IS NUUMBER FOOOUR!"
+                           Result5 -> text "give me a high five"
+                           Result6 -> do
+                                        target Sidebar $ button (UpdateSidebar (Just "surprise!!")) id "click me to get surprise in sidebar"
+
+data Sidebar = Sidebar
+  deriving (Show, Read, ViewId)
+
+data SidebarAction = UpdateSidebar (Maybe Text)
+  deriving (Show, Read, ViewAction)
+
+instance HyperView Sidebar where
+  type Action Sidebar = SidebarAction
+
+sidebar :: Sidebar -> SidebarAction -> Eff es (View Sidebar ())
+sidebar _ (UpdateSidebar x) = pure $ sidebarView x
+
+sidebarView :: Maybe Text -> View Sidebar ()
+sidebarView = el (border 3 . pad 10) .  text . fromMaybe "N/A"
