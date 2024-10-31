@@ -25,14 +25,15 @@ data Selected = A | B | C deriving (Show, Eq, Read)
 
 instance HyperView Central where
   type Action Central = CentralAction
-
+  type Require Central = '[Presets]
+  
 central :: Central -> CentralAction -> Eff es (View Central ())
 central _ (ChangeSelectedTo x) = pure $ centralView x
 
-centralPage :: (Hyperbole :> es) => Page es '[Central]
+centralPage :: (Hyperbole :> es) => Page es '[Central, Presets]
 centralPage = do
   -- message listens for any actions that the centralView triggers
-  handle central $ load $ do
+  handle central $ handle presets $ load $ do
     pure $ do
       el bold "Message Page"
       hyper Central $ centralView A
@@ -45,4 +46,19 @@ centralView s = do
     button (ChangeSelectedTo B) id "B"
     button (ChangeSelectedTo C) id "C"
     col (border 3 . pad 10) $ do
-      text "foo"
+      hyper Presets presetsView
+
+data Presets = Presets
+  deriving (Show, Read, ViewId)
+
+data PresetsAction = View deriving (Show, Read, ViewAction)
+
+instance HyperView Presets where
+  type Action Presets = PresetsAction
+
+presets :: (Hyperbole :> es) => Presets -> PresetsAction -> Eff es (View Presets ())
+presets _ View = pure $ presetsView
+
+presetsView :: View Presets ()
+presetsView = do
+  text "foo"
