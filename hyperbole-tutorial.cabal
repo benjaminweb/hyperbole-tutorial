@@ -1,0 +1,66 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:               hyperbole-tutorial
+version:            0.1
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Benjamin Weber <one@bwe.im>
+maintainer:         Benjamin Weber <one@bwe.im>
+category:           tutorial
+stability:          unstable
+build-type:         Simple
+extra-source-files:
+      README.md
+
+library
+    other-modules:
+          Paths_hyperbole_tutorial
+    autogen-modules:
+          Paths_hyperbole_tutorial
+    default-extensions:
+          OverloadedStrings OverloadedRecordDot DuplicateRecordFields DeriveAnyClass RecordWildCards DuplicateRecordFields TypeFamilies DataKinds DerivingStrategies
+    ghc-options: -Wall -Wunused-binds -fdefer-typed-holes
+    build-depends:
+          base >=4.17.0.0
+        , effectful
+        , http-api-data
+        , hyperbole
+        , string-conversions
+        , string-interpolate
+        , text
+        , web-view
+    default-language: GHC2021
+
+executable page
+    main-is: Main.hs
+    other-modules:
+          Paths_hyperbole_tutorial
+    autogen-modules:
+          Paths_hyperbole_tutorial
+    hs-source-dirs:
+          app
+    default-extensions:
+          OverloadedStrings OverloadedRecordDot DuplicateRecordFields DeriveAnyClass RecordWildCards DuplicateRecordFields TypeFamilies DataKinds DerivingStrategies
+    build-depends:
+          base >=4.17.0.0
+        , cookie
+        , effectful
+        , file-embed
+        , http-api-data
+        , http-types
+        , hyperbole
+        , network
+        , string-conversions
+        , string-interpolate
+        , text
+        , wai
+        , wai-middleware-static
+        , wai-websockets
+        , warp
+        , web-view
+        , websockets
+    default-language: GHC2021

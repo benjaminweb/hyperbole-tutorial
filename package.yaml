@@ -1,0 +1,58 @@
+name: hyperbole-tutorial
+version: 0.1
+license: BSD-3-Clause
+license-file: LICENSE
+category: tutorial
+author: Benjamin Weber <one@bwe.im>
+maintainer: Benjamin Weber <one@bwe.im>
+stability: unstable
+
+extra-source-files:
+  - README.md
+
+dependencies:
+    - base >=4.17.0.0
+    - text
+    - hyperbole
+    - effectful
+    - web-view
+    - http-api-data
+    - string-interpolate
+    - string-conversions
+
+language: GHC2021
+
+default-extensions:
+    OverloadedStrings
+    OverloadedRecordDot
+    DuplicateRecordFields
+    DeriveAnyClass
+    RecordWildCards
+    DuplicateRecordFields
+    TypeFamilies
+    DataKinds
+    DerivingStrategies
+
+library:
+    ghc-options: [-Wall, -Wunused-binds, -fdefer-typed-holes]
+
+executables:
+  page:
+    source-dirs:
+      - app
+    main: Main.hs
+    dependencies:
+     - string-interpolate
+     - file-embed
+     - http-api-data
+     - http-types
+     - wai-middleware-static
+     - websockets
+     - wai
+     - warp
+     - web-view
+     - string-conversions
+     - wai-websockets
+     - network
+     - websockets
+     - cookie
