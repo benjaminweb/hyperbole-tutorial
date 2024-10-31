@@ -81,7 +81,7 @@ presetsView s = do
 data Results = Results
   deriving (Show, Read, ViewId)
 
-data ResultVariant = Result1 | Result2 | Result3 | Result4 | Result5 | Result6 deriving (Show, Eq, Read)
+data ResultVariant = Result1 | Result2 | Result3 | Result4 | Result5 | Result6 | Result7 | Result8 deriving (Show, Eq, Read)
 
 data ResultsAction = ViewResults (Maybe ResultVariant) deriving (Show, Read, ViewAction)
 
@@ -102,6 +102,8 @@ resultsView (Just x) = col (border 3 . pad 10) $
                            Result5 -> text "give me a high five"
                            Result6 -> do
                                         target Sidebar $ button (UpdateSidebar (Just "surprise!!")) id "click me to get surprise in sidebar"
+                           Result7 -> target Results $ onLoad (ViewResults (Just Result8)) 0 (el_ "loading…")
+                           Result8 -> text "you unlocked the secret chamber"
 
 data Sidebar = Sidebar
   deriving (Show, Read, ViewId)
@@ -116,4 +118,8 @@ sidebar :: Sidebar -> SidebarAction -> Eff es (View Sidebar ())
 sidebar _ (UpdateSidebar x) = pure $ sidebarView x
 
 sidebarView :: Maybe Text -> View Sidebar ()
-sidebarView = el (border 3 . pad 10) .  text . fromMaybe "N/A"
+sidebarView x = col (border 3 . pad 10) $ do
+                  text $ fromMaybe "N/A" x
+                  case x of
+                    Just "surprise!!" -> target Results $ button (ViewResults (Just Result7)) id "set to Result7"
+                    Nothing -> none
