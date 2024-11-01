@@ -38,8 +38,9 @@ centralPage = do
     pure $ do
       el bold "Message Page"
       row (border 3 . pad 10 . gap 10) $ do
-        hyper Sidebar $ sidebarView Nothing
+        hyper (Sidebar 1) $ sidebarView Nothing
         hyper Central $ centralView A
+        hyper (Sidebar 2) $ sidebarView Nothing
 
 centralView :: Selected -> View Central ()
 centralView s = do
@@ -101,11 +102,14 @@ resultsView (Just x) = col (border 3 . pad 10) $
                            Result4 -> text "THIS IS NUUMBER FOOOUR!"
                            Result5 -> text "give me a high five"
                            Result6 -> do
-                                        target Sidebar $ button (UpdateSidebar (Just "surprise!!")) id "click me to get surprise in sidebar"
-                           Result7 -> target Results $ onLoad (ViewResults (Just Result8)) 0 (el_ "loading…")
+                                        target (Sidebar 1) $ button (UpdateSidebar (Just "surprise!!")) id "click me to get surprise in sidebar"
+                           Result7 -> do
+                                        target Results $ onLoad (ViewResults (Just Result8)) 0 (el_ "loading…")
+                                        target (Sidebar 2) $ onLoad (UpdateSidebar (Just "unlocking secret chamber…")) 0 (el_ "loading…")
+                                        target (Sidebar 1) $ onLoad (UpdateSidebar (Just "wohoo! you did it!")) 0 (el_ "loading…")
                            Result8 -> text "you unlocked the secret chamber"
 
-data Sidebar = Sidebar
+data Sidebar = Sidebar Int
   deriving (Show, Read, ViewId)
 
 data SidebarAction = UpdateSidebar (Maybe Text)
@@ -122,4 +126,5 @@ sidebarView x = col (border 3 . pad 10) $ do
                   text $ fromMaybe "N/A" x
                   case x of
                     Just "surprise!!" -> target Results $ button (ViewResults (Just Result7)) id "set to Result7"
+                    Just x -> none
                     Nothing -> none
