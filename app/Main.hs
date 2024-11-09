@@ -5,16 +5,15 @@ import Data.Text (Text)
 import Web.Hyperbole
 import Data.Maybe (fromMaybe)
 
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
 main = do
-  run 3000 $ do
-    liveApp (basicDocument "Skeleton") (page $ centralPage)
-
-
+  run 3000 $ liveApp (basicDocument "Skeleton") (page $ centralPage)
 
 data Central = Central
   deriving (Show, Read, ViewId)
@@ -28,13 +27,13 @@ instance HyperView Central where
   type Action Central = CentralAction
   type Require Central = '[Presets, Results, Sidebar]
   
-central :: Central -> CentralAction -> Eff es (View Central ())
-central _ (ChangeSelectedTo x) = pure $ centralView x
+instance Handle Central es where
+  handle _ (ChangeSelectedTo x) = pure $ centralView x
 
 centralPage :: (Hyperbole :> es) => Page es '[Central, Presets, Results, Sidebar]
 centralPage = do
   -- message listens for any actions that the centralView triggers
-  handle central $ handle presets $ handle results $ handle sidebar $ load $ do
+  load $ do
     pure $ do
       el bold "Message Page"
       row (border 3 . pad 10 . gap 10) $ do
@@ -61,8 +60,8 @@ data PresetsAction = View Selected deriving (Show, Read, ViewAction)
 instance HyperView Presets where
   type Action Presets = PresetsAction
 
-presets :: (Hyperbole :> es) => Presets -> PresetsAction -> Eff es (View Presets ())
-presets _ (View s) = pure $ presetsView s
+instance Handle Presets es where
+  handle _ (View s) = pure $ presetsView s
 
 presetsView :: Selected -> View Presets ()
 presetsView s = do
@@ -89,8 +88,9 @@ data ResultsAction = ViewResults (Maybe ResultVariant) deriving (Show, Read, Vie
 instance HyperView Results where
   type Action Results = ResultsAction
 
-results :: (Hyperbole :> es) => Results -> ResultsAction -> Eff es (View Results ())
-results _ (ViewResults x) = pure $ col (border 3 . pad 10) $ resultsView x
+instance Handle Results es where
+  handle _ action = case action of
+    ViewResults x -> pure $ col (border 3 . pad 10) $ resultsView x
 
 resultsView :: Maybe ResultVariant -> View Results ()
 resultsView Nothing = col (border 3 . pad 10) $ el_ $ text "no results!"
@@ -118,8 +118,9 @@ data SidebarAction = UpdateSidebar (Maybe Text)
 instance HyperView Sidebar where
   type Action Sidebar = SidebarAction
 
-sidebar :: Sidebar -> SidebarAction -> Eff es (View Sidebar ())
-sidebar _ (UpdateSidebar x) = pure $ sidebarView x
+instance Handle Sidebar es where
+  handle _ action = case action of
+    UpdateSidebar x -> pure $ sidebarView x
 
 sidebarView :: Maybe Text -> View Sidebar ()
 sidebarView x = col (border 3 . pad 10) $ do

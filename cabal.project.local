@@ -6,4 +6,4 @@ tests: True
 source-repository-package
   type: git
   location: https://github.com/seanhess/hyperbole
-  tag: main
+  tag: origin/class-handlers-new
