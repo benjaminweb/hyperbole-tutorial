@@ -14,8 +14,6 @@ main = do
   run 3000 $ do
     liveApp (basicDocument "Skeleton") (page $ centralPage)
 
-
-
 data Central = Central
   deriving (Show, Read, ViewId)
 
@@ -31,10 +29,10 @@ instance HyperView Central where
 central :: Central -> CentralAction -> Eff es (View Central ())
 central _ (ChangeSelectedTo x) = pure $ centralView x
 
-centralPage :: (Hyperbole :> es) => Page es '[Central, Presets, Results, Sidebar]
+centralPage :: (Hyperbole :> es) => Page es (Central, Presets, Results, Sidebar)
 centralPage = do
   -- message listens for any actions that the centralView triggers
-  handle central $ handle presets $ handle results $ handle sidebar $ load $ do
+  handle (central, presets, results, sidebar) $ do
     pure $ do
       el bold "Message Page"
       row (border 3 . pad 10 . gap 10) $ do
