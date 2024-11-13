@@ -13,7 +13,7 @@ import Data.Maybe (fromMaybe)
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
 main = do
-  run 3000 $ liveApp (basicDocument "Skeleton") (page $ centralPage)
+  run 3000 $ liveApp (basicDocument "Skeleton") (runPage centralPage)
 
 data Central = Central
   deriving (Show, Read, ViewId)
@@ -28,12 +28,11 @@ instance HyperView Central where
   type Require Central = '[Presets, Results, Sidebar]
   
 instance Handle Central es where
-  handle _ (ChangeSelectedTo x) = pure $ centralView x
+  handle (ChangeSelectedTo x) = pure $ centralView x
 
 centralPage :: (Hyperbole :> es) => Page es '[Central, Presets, Results, Sidebar]
 centralPage = do
   -- message listens for any actions that the centralView triggers
-  load $ do
     pure $ do
       el bold "Message Page"
       row (border 3 . pad 10 . gap 10) $ do
@@ -61,7 +60,7 @@ instance HyperView Presets where
   type Action Presets = PresetsAction
 
 instance Handle Presets es where
-  handle _ (View s) = pure $ presetsView s
+  handle (View s) = pure $ presetsView s
 
 presetsView :: Selected -> View Presets ()
 presetsView s = do
@@ -89,7 +88,7 @@ instance HyperView Results where
   type Action Results = ResultsAction
 
 instance Handle Results es where
-  handle _ action = case action of
+  handle action = case action of
     ViewResults x -> pure $ col (border 3 . pad 10) $ resultsView x
 
 resultsView :: Maybe ResultVariant -> View Results ()
@@ -119,7 +118,7 @@ instance HyperView Sidebar where
   type Action Sidebar = SidebarAction
 
 instance Handle Sidebar es where
-  handle _ action = case action of
+  handle action = case action of
     UpdateSidebar x -> pure $ sidebarView x
 
 sidebarView :: Maybe Text -> View Sidebar ()
